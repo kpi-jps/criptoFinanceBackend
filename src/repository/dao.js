@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 
 const saltRounds = 10; //used by bcrypt
 
-const  createUser = async (name, email, passwd) => {
+const createUser = async (name, email, passwd) => {
     await db.sync();
     bcrypt.hash(passwd, saltRounds, (err, hash) => {
         const user = models.User.create({
@@ -16,24 +16,48 @@ const  createUser = async (name, email, passwd) => {
     });
 }
 
-const  findUser = async (email, passwd) => {
+const findUser = async (email) => {
     await db.sync();
     const user = await models.User.findOne({
         where : {
             email : email
         }
     });
+   return user;
+}
 
+const checkUserCredentials = async (email, passwd) => {
+    await db.sync();
+    const user = await findUser(email);
     if(user != null) 
         bcrypt.compare(passwd, user.hash, (err, check) => {
-            if(!check) return null;
-            else console.log(user.email);
+            return check;
         })
-    else return null;
+    else return false;
+}
+
+const updateUserName = async (email, name) => {
+    await db.sync();
+    const user = await models.User.update({name: name}, {
+        where : {
+            email : email
+        }
+    });
+}
+
+const updateUserPasswd = async (email, newPasswd) => {
+    await db.sync();
+    bcrypt.hash(newPasswd, saltRounds, (err, hash) => {
+        const user = models.User.update({hash: hash}, {
+            where : {
+                email : email
+            }
+        });
+    });
 }
 
 const createCryptoRegistry = async (ticker, value, userId) => {
 
 }
 //createUser('João Pedro', 'jps.spj@gmail.com', '1234');
-findUser('jps.spj@gmail.com', '1234');
+console.log(checkUserCredentials('jps.spj@gmail.com', '1234'));
