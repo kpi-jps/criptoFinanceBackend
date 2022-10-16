@@ -106,6 +106,17 @@ const deleteCryptoRegistry = async (id, userId) => {
         }
     })
 }
+
+module.exports = {
+    user: {
+        createUser, checkUserCredentials, updateUserName, updateUserPasswd
+    },
+    cryptoRegistry: {
+        createCryptoRegistry, findCryptoRegistry, findCryptoRegisters, 
+        updateCryptoRegistry, deleteCryptoRegistry
+    }
+     
+}
 //createUser('João Pedro', 'jps.spj@gmail.com', '1234');
-deleteCryptoRegistry(1,1);
-console.log(checkUserCredentials('jps.spj@gmail.com', '1234'));
+//deleteCryptoRegistry(1,1);
+//console.log(checkUserCredentials('jps.spj@gmail.com', '1234'));
