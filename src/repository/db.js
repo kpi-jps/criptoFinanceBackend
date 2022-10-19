@@ -1,6 +1,6 @@
 const fs = require('fs');
 const Sequelize = require('sequelize');
-const databaseURL = 'database/datebase.sqlite';
+const databaseURL = 'repository/database/database.sqlite';
 
 const sequelize = () => {
     if (!fs.existsSync(databaseURL)) {

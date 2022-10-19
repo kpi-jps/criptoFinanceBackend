@@ -5,35 +5,50 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10; //used by bcrypt
 
 const createUser = async (name, email, passwd) => {
-    await db.sync();
-    bcrypt.hash(passwd, saltRounds, (err, hash) => {
-        const user = models.User.create({
+    try {
+        await db.sync();
+        const hash = bcrypt.hashSync(passwd, saltRounds);
+        const user = await models.User.create({
             name: name, 
             email: email,
             hash: hash
         });
-        console.log(user.id);
-    });
+       return {userId: user.id, userName: user.name};
+        
+    } catch (error) {
+        throw error;
+    }
+    
 }
 
 const findUser = async (email) => {
+    try {
+        await db.sync(); 
+        const user = await models.User.findOne({
+            where : {
+                email : email
+            }
+        });
+       return user;
+    } catch (error) {
+        throw error;
+    }
+}
+
+const getUser = async (id) => {
     await db.sync();
-    const user = await models.User.findOne({
-        where : {
-            email : email
-        }
-    });
-   return user;
+    const user = await models.User.findByPk(id);
+    return user;
 }
 
 const checkUserCredentials = async (email, passwd) => {
-    await db.sync();
-    const user = await findUser(email);
-    if(user != null) 
-        bcrypt.compare(passwd, user.hash, (err, check) => {
-            return check;
-        })
-    else return false;
+    try {
+        await db.sync();
+        const user = await findUser(email);
+        return bcrypt.compareSync(passwd, user.hash)
+    } catch (error) {
+        throw error;
+    }
 }
 
 const updateUserName = async (email, name) => {
@@ -109,7 +124,7 @@ const deleteCryptoRegistry = async (id, userId) => {
 
 module.exports = {
     user: {
-        createUser, checkUserCredentials, updateUserName, updateUserPasswd
+        createUser, getUser, checkUserCredentials, updateUserName, updateUserPasswd
     },
     cryptoRegistry: {
         createCryptoRegistry, findCryptoRegistry, findCryptoRegisters, 
