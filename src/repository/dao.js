@@ -31,14 +31,22 @@ const findUser = async (email) => {
         });
        return user;
     } catch (error) {
-        throw error;
+        
     }
 }
 
 const getUser = async (id) => {
-    await db.sync();
-    const user = await models.User.findByPk(id);
-    return user;
+    try {
+        await db.sync();
+        const user = await models.User.findByPk(id);
+        return {
+            userId: user.id,
+            userName: user.name
+        };
+    } catch (error) {
+        throw error;
+    }
+    
 }
 
 const checkUserCredentials = async (email, passwd) => {
@@ -52,23 +60,31 @@ const checkUserCredentials = async (email, passwd) => {
 }
 
 const updateUserName = async (email, name) => {
-    await db.sync();
-    await models.User.update({name: name}, {
-        where : {
-            email : email
-        }
-    });
+    try {
+        await db.sync();
+        await models.User.update({name: name}, {
+            where : {
+                email : email
+            }
+        });
+    } catch (error) {
+        throw error;
+    }  
 }
 
 const updateUserPasswd = async (email, newPasswd) => {
-    await db.sync();
-    bcrypt.hash(newPasswd, saltRounds, (err, hash) => {
+    try {
+        await db.sync();
+        const hash = bcrypt.hashSync(newPasswd, saltRounds);
         models.User.update({hash: hash}, {
             where : {
                 email : email
             }
         });
-    });
+        
+    } catch (error) {
+        throw error;
+    }
 }
 
 const findCryptoRegistry = async (id, userId) => {
