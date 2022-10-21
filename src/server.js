@@ -19,7 +19,7 @@ app.use(cors());
 app.use(bodyparser.urlencoded({extended: true}));
 app.use(bodyparser.json());
 
-app.post('/user/create', async (req, res, next) => {
+app.post('/user/create', async (req, res) => {
     try {
         const name =  req.body.name;
         const email =  req.body.email;
@@ -27,72 +27,83 @@ app.post('/user/create', async (req, res, next) => {
         const userInfo =  await dao.user.createUser(name, email, passwd);
         res.json(userInfo);
     } catch (error) {
+        res.status(500);
         console.error(error.message);
+        console.error(error.stack);
         res.json(error);
-        //next(error);
     } 
     
 });
 
-app.post('/user/update-name', async (req, res, next) => {
+app.post('/user/update-name', async (req, res) => {
     try {
         const newName =  req.body.name;
         const email =  req.body.email;
         const userInfo =  await dao.user.updateUserName(email, newName);
         res.json({msg: updateUserNameMsg});
     } catch (error) {
+        res.status(500);
         console.error(error.message);
-        next(error);
+        console.error(error.stack);
+        res.json(error);
     } 
 });
 
-app.post('/user/update-passwd', async (req, res, next) => {
+app.post('/user/update-passwd', async (req, res) => {
     try {
         const newPasswd =  req.body.passwd;
         const email =  req.body.email;
         await dao.user.updateUserName(email, newPasswd);
         res.json({msg: updatePasswdMsg});
     } catch (error) {
+        res.status(500);
         console.error(error.message);
-        next(error);
+        console.error(error.stack);
+        res.json(error);
     } 
 });
 
-app.post('/user/login', async (req, res, next) => {
+app.post('/user/login', async (req, res) => {
     try {
         const email =  req.body.email;
         const passwd =  req.body.passwd;
         const check = await dao.user.checkUserCredentials(email, passwd);
         res.json({login: check});
     } catch (error) {
+        res.status(500);
         console.error(error.message);
-        next(error);
+        console.error(error.stack);
+        res.json(error);
     }
 });
 
-app.get('/user/:id', async (req, res, next) => {
+app.get('/user/:id', async (req, res) => {
     try {
         const userInfo = await dao.user.getUser(req.params.id);
         res.json(userInfo);
     } catch (error) {
+        res.status(500);
         console.error(error.message);
-        next(error);
+        console.error(error.stack);
+        res.json(error);
     }
 })
 
-app.get('/crypto/search/:ticker', async (req, res, next) => {
+app.get('/crypto/search/:ticker', async (req, res) => {
     try {
         const url = `https://data.messari.io/api/v1/assets/${req.params.ticker.toLowerCase()}/metrics`;
         const response = await fetch(url);
         const json = await response.json();
         res.json(json);
     } catch (error) {
+        res.status(500);
         console.error(error.message);
-        next(error);
+        console.error(error.stack);
+        res.json(error);
     }
 });
 
-app.post('/crypto/create', async (req, res, next) => {
+app.post('/crypto/create', async (req, res) => {
     try {
         const ticker = req.body.ticker;
         const quantity = req.body.quantity;
@@ -100,51 +111,61 @@ app.post('/crypto/create', async (req, res, next) => {
         const cryptoRegistry = await dao.cryptoRegistry.createCryptoRegistry(ticker, quantity, userId);
         res.json(cryptoRegistry);
     } catch (error) {
+        res.status(500);
         console.error(error.message);
-        next(error);
+        console.error(error.stack);
+        res.json(error);
     }
 })
 
-app.post('/crypto/update', async (req, res, next) => {
+app.post('/crypto/update', async (req, res) => {
     try {
         const id = req.body.id;
         const userId = req.body.userId;
         await dao.cryptoRegistry.updateCryptoRegistry(id, userId);
         res.json({msg: updateCryptoRegistryMsg});
     } catch (error) {
+        res.status(500);
         console.error(error.message);
-        next(error);
+        console.error(error.stack);
+        res.json(error);
     }
 })
 
 
-app.get('/crypto/delete/:userId/:id', async (req, res, next) => {
+app.get('/crypto/delete/:userId/:id', async (req, res) => {
     try {
         const id = req.params.id;
         const userId = req.params.userId;
         await dao.cryptoRegistry.deleteCryptoRegistry(id, userId);
         res.json({msg: updateCryptoRegistryMsg});
     } catch (error) {
+        res.status(500);
         console.error(error.message);
-        next(error);
+        console.error(error.stack);
+        res.json(error);
     }
 })
 
-app.get('/crypto/get/:userId/:id', async (req, res, next) => {
+app.get('/crypto/get/:userId/:id', async (req, res) => {
     try {
         
     } catch (error) {
+        res.status(500);
         console.error(error.message);
-        next(error);
+        console.error(error.stack);
+        res.json(error);
     }
 })
 
-app.get('/crypto/getAll/:userId', async (req, res, next) => {
+app.get('/crypto/getAll/:userId', async (req, res) => {
     try {
         
     } catch (error) {
+        res.status(500);
         console.error(error.message);
-        next(error);
+        console.error(error.stack);
+        res.json(error);
     }
 })
 
