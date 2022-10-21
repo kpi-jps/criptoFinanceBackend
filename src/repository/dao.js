@@ -21,20 +21,6 @@ const createUser = async (name, email, passwd) => {
     
 }
 
-const findUser = async (email) => {
-    try {
-        await db.sync(); 
-        const user = await models.User.findOne({
-            where : {
-                email : email
-            }
-        });
-       return user;
-    } catch (error) {
-        
-    }
-}
-
 const getUser = async (id) => {
     try {
         await db.sync();
@@ -87,55 +73,78 @@ const updateUserPasswd = async (email, newPasswd) => {
     }
 }
 
-const findCryptoRegistry = async (id, userId) => {
-    await db.sync();
-    const cryptoRegistry = await models.User.findOne({
-        where: {
-            id: id,
+
+const createCryptoRegistry = async (ticker, quantity, userId) => {
+    try {
+        await db.sync();
+        const cryptoRegistry = await models.CryptoRegistry.create({
+            ticker: ticker,
+            quantity: quantity,
             userId: userId
-        }
-    });
-   return cryptoRegistry;
+        })
+
+        return cryptoRegistry;
+    } catch (error) {
+        throw error;
+    }
+}
+
+const findCryptoRegistry = async (id, userId) => {
+    try {
+        await db.sync();
+        const cryptoRegistry = await models.User.findOne({
+            where: {
+                id:id,
+                userId: userId
+            }
+        });
+        return cryptoRegistry;
+    } catch (error) {
+        throw error;
+    }
+    
 }
 
 const findCryptoRegisters = async (userId) => {
-    await db.sync();
-    const cryptoRegisters = await models.User.findAll({
-        where: {
-            userId: userId
-        }
-    });
-   return cryptoRegisters;
+    try {
+        await db.sync();
+        const cryptoRegisters = await models.User.findAll({
+            where: {
+                userId: userId
+            }
+        });
+        return cryptoRegisters;
+    } catch (error) {
+        throw error;
+    }
+    
 }
 
-const createCryptoRegistry = async (ticker, value, userId) => {
-    await db.sync();
-    const cryptoRegistry = await models.CryptoRegistry.create({
-        ticker: ticker,
-        value: value,
-        userId: userId
-    })
-}
-
-
-const updateCryptoRegistry = async (ticker, value, userId) => {
-    await db.sync();
-    await models.CryptoRegistry.update({
-        ticker: ticker,
-        value: value
-    }, { where: {
-        userId: userId
-    }})
+const updateCryptoRegistry = async (id, userId, quantity) => {
+    try {
+        await db.sync();
+        await models.CryptoRegistry.update(
+                {quantity: quantity}, 
+                { where: {id: id, userId: userId}}
+            );
+    } catch (error) {
+        throw error;
+    }
+   
 }
 
 const deleteCryptoRegistry = async (id, userId) => {
-    await db.sync();
-    await models.CryptoRegistry.destroy({
-        where: {
-            id: id,
-            userId: userId
-        }
-    })
+    try {
+        await db.sync();
+        await models.CryptoRegistry.destroy({
+            where: {
+                id: id,
+                userId: userId
+            }
+        });
+    } catch (error) {
+        throw error;
+    }  
 }
 
 module.exports = {

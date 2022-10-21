@@ -34,7 +34,7 @@ const CryptoRegistry = sequelize.define('CryptoRegistry', {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    value: {
+    quantity: {
         type: DataTypes.NUMBER,
         allowNull: false
     },

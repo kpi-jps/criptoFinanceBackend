@@ -2,13 +2,16 @@ const express = require('express');
 const bodyparser = require('body-parser');
 const cors = require("cors");
 const dao = require('./repository/dao.js');
-const fetch = (...args) =>
-	import('node-fetch').then(({default: fetch}) => fetch(...args));
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const port = 5555;
 
 
-const updatePasswdMsg = 'User password update successfully!'
-const updateUserNameMsg = 'User name update successfully!'
+const updatePasswdMsg = 'User\'s password update successfully!';
+//const updatePasswdErrorMsg = 'Error during user\'s password update!';
+const updateUserNameMsg = 'User\'s name update successfully!';
+//const updateNamedErrorMsg = 'Error during user\'s name update!'
+const updateCryptoRegistryMsg = 'CryptoRegistry\'s update successfully!';
+//const updateCryptoRegistryErroMsg = 'Error during CryptoRegistry\'s update!';
 
 const app = express();
 app.use(cors());
@@ -25,7 +28,8 @@ app.post('/user/create', async (req, res, next) => {
         res.json(userInfo);
     } catch (error) {
         console.error(error.message);
-        next(error);
+        res.json(error);
+        //next(error);
     } 
     
 });
@@ -86,8 +90,62 @@ app.get('/crypto/search/:ticker', async (req, res, next) => {
         console.error(error.message);
         next(error);
     }
-    
+});
 
+app.post('/crypto/create', async (req, res, next) => {
+    try {
+        const ticker = req.body.ticker;
+        const quantity = req.body.quantity;
+        const userId = req.body.userId;
+        const cryptoRegistry = await dao.cryptoRegistry.createCryptoRegistry(ticker, quantity, userId);
+        res.json(cryptoRegistry);
+    } catch (error) {
+        console.error(error.message);
+        next(error);
+    }
+})
+
+app.post('/crypto/update', async (req, res, next) => {
+    try {
+        const id = req.body.id;
+        const userId = req.body.userId;
+        await dao.cryptoRegistry.updateCryptoRegistry(id, userId);
+        res.json({msg: updateCryptoRegistryMsg});
+    } catch (error) {
+        console.error(error.message);
+        next(error);
+    }
+})
+
+
+app.get('/crypto/delete/:userId/:id', async (req, res, next) => {
+    try {
+        const id = req.params.id;
+        const userId = req.params.userId;
+        await dao.cryptoRegistry.deleteCryptoRegistry(id, userId);
+        res.json({msg: updateCryptoRegistryMsg});
+    } catch (error) {
+        console.error(error.message);
+        next(error);
+    }
+})
+
+app.get('/crypto/get/:userId/:id', async (req, res, next) => {
+    try {
+        
+    } catch (error) {
+        console.error(error.message);
+        next(error);
+    }
+})
+
+app.get('/crypto/getAll/:userId', async (req, res, next) => {
+    try {
+        
+    } catch (error) {
+        console.error(error.message);
+        next(error);
+    }
 })
 
 
