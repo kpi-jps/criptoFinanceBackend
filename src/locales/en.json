@@ -1,0 +1,11 @@
+{
+	"updatePasswdMsg": "User's password update successfully!",
+	"updateUserNameMsg": "User's name update successfully!",
+	"updateCryptoRegistryMsg": "CryptoRegistry updated successfully!",
+    "deleteCryptoRegistryMsg": "CryptoRegistry deleted successfully!",
+	"unauthorizedLoginMsg": "User not autenticated!",
+	"logoutMsg": "User logout successfully!",
+	"invalidEmailMsg": "Invalid email!",
+	"invalidPasswdMsg": "Invalid password!",
+	"loginMsg": "User logged!"
+}

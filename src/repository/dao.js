@@ -38,7 +38,11 @@ const getUser = async (id) => {
 const checkUserCredentials = async (email, passwd) => {
     try {
         await db.sync();
-        const user = await findUser(email);
+        const user = await models.User.findOne({
+            where: {
+                email: email
+            }
+        });
         const check = bcrypt.compareSync(passwd, user.hash);
         if(check) {
             return {
@@ -102,7 +106,7 @@ const createCryptoRegistry = async (ticker, quantity, userId) => {
 const getCryptoRegistry = async (id, userId) => {
     try {
         await db.sync();
-        const cryptoRegistry = await models.User.findOne({
+        const cryptoRegistry = await models.CryptoRegistry.findOne({
             where: {
                 id:id,
                 userId: userId
@@ -118,7 +122,7 @@ const getCryptoRegistry = async (id, userId) => {
 const getCryptoRegisters = async (userId) => {
     try {
         await db.sync();
-        const cryptoRegisters = await models.User.findAll({
+        const cryptoRegisters = await models.CryptoRegistry.findAll({
             where: {
                 userId: userId
             }
@@ -156,7 +160,7 @@ const deleteCryptoRegistry = async (id, userId) => {
         throw error;
     }  
 }
-
+/*
 const saveToken = async (token, userId) => {
     try {
         await db.sync();
@@ -173,19 +177,19 @@ const saveToken = async (token, userId) => {
 const isInactiveToken = async (token, userId) => {
     try {
         await db.sync();
-        const result = await models.User.findOne({
+        const result = await models.InactiveToken.findOne({
             where: {
                 token:token,
                 userId: userId
             }
         });
-        if (result == null) return true
-        return false
+        if (result == null) return false
+        return true
     } catch (error) {
         throw error;
     }
 }
-
+*/
 module.exports = {
     user: {
         createUser, getUser, checkUserCredentials, updateUserName, updateUserPasswd
@@ -195,9 +199,11 @@ module.exports = {
         updateCryptoRegistry, deleteCryptoRegistry
     },
 
+    /*
     authenticate: {
         isInactiveToken, saveToken
     }
+    */
      
 }
 //createUser('João Pedro', 'jps.spj@gmail.com', '1234');

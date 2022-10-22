@@ -1,0 +1,13 @@
+
+{
+    "updatePasswdMsg" : "Senha do usuário alterada com sucesso!",
+    "updateUserNameMsg" : "Nome do usuário alterado com sucesso!",
+    "updateCryptoRegistryMsg" : "Cripto registro alterado com sucesso",
+    "deleteCryptoRegistryMsg": "Cripto registro deletado com sucesso!",
+    "unauthorizedLoginMsg" : "Usuário não autenticado",
+    "loginMsg" : "Usuário logado!",
+    "logoutMsg" : "Usuário deslogado!",
+    "invalidEmailMsg" : "Email inválido!",
+    "invalidPasswdMsg" : "Senha inválida"
+
+}
