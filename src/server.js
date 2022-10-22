@@ -19,7 +19,7 @@ const validator = require('./utils/validator');
 
 //Configurations
 i18n.configure({
-    defaultLocale: 'en',
+    defaultLocale: 'pt-BR',
     locales: ['pt-BR', 'pt', 'en'],
     directory: './locales',
     extension: '.json',
@@ -35,7 +35,6 @@ app.use(bodyparser.urlencoded({extended: true}));
 app.use(bodyparser.json());
 
 app.use((req, res, next) => {
-    console.log(req);
     console.log(req.acceptsLanguages());
     let lang = req.acceptsLanguages()[0];
     console.log(lang);
@@ -117,11 +116,20 @@ app.post('/user/create', async (req, res) => {
 
 app.post('/user/update-name', checkToken, async (req, res) => {
     try {
-        const newName =  req.body.name;
+        const newName =  req.body.newName;
         const email =  req.body.email;
+        validator.emailValidator(email, res.__("invalidEmailMsg"));
         const userInfo =  await dao.user.updateUserName(email, newName);
         res.json({msg: res.__("updateUserNameMsg")});
     } catch (error) {
+        if(error instanceof validator.InvalidEmailError) {
+            res.status(500).json({msg: error.message});
+            return;
+        }
+        if(error instanceof validator.InvalidPasswdError) {
+            res.status(500).json({msg: error.message});
+            return;
+        }
         res.status(500);
         console.error(error.message);
         console.error(error.stack);
@@ -131,9 +139,9 @@ app.post('/user/update-name', checkToken, async (req, res) => {
 
 app.post('/user/update-passwd', checkToken, async (req, res) => {
     try {
-        const newPasswd =  req.body.passwd;
+        const newPasswd =  req.body.newPasswd;
         const email =  req.body.email;
-        await dao.user.updateUserName(email, newPasswd);
+        await dao.user.updateUserPasswd(email, newPasswd);
         res.json({msg: res.__("updatePasswdMsg")});
     } catch (error) {
         res.status(500);
@@ -152,7 +160,7 @@ app.post('/user/login', async (req, res) => {
         if(result.check) {
             const token = tokenGen(result.userId)
             res.cookie("token", token)
-            res.json({login: result.check, msg: res.__("loginMsg")});
+            res.json({login: result.check, msg: res.__("loginMsg"), userId: result.userId});
         } else {
             res.status(401).json({login: result.check, msg: res.__("unauthorizedLoginMsg")});
         }
@@ -191,9 +199,9 @@ app.get('/user/logout', async (req, res) => {
 
 app.get('/user/logout', (req, res) => {
     try {
-        const token = req.cookies.token;
-        const decoded = jwt.verify(token, publicKey, {algorithm: ["RS256"]});
-        const newToken = jwt.sign({userId: decoded.userId}, privateKey, {
+        //const token = req.cookies.token;
+        //const decoded = jwt.verify(token, publicKey, {algorithm: ["RS256"]});
+        const newToken = jwt.sign({}, privateKey, {
             algorithm: "RS256",
             expiresIn: 1
         })
@@ -252,7 +260,8 @@ app.post('/crypto/update', checkToken, async (req, res) => {
     try {
         const id = req.body.id;
         const userId = req.body.userId;
-        await dao.cryptoRegistry.updateCryptoRegistry(id, userId);
+        const quantity = req.body.quantity;
+        await dao.cryptoRegistry.updateCryptoRegistry(id, userId, quantity);
         res.json({msg: res.__("updateCryptoRegistryMsg")});
     } catch (error) {
         res.status(500);
