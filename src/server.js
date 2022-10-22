@@ -1,23 +1,56 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
+const fs = require('fs');
 const bodyparser = require('body-parser');
 const cors = require("cors");
 const dao = require('./repository/dao.js');
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const port = 5555;
+const tokenExpiresTime = 3600; //seconds
 
 
 const updatePasswdMsg = 'User\'s password update successfully!';
-//const updatePasswdErrorMsg = 'Error during user\'s password update!';
 const updateUserNameMsg = 'User\'s name update successfully!';
-//const updateNamedErrorMsg = 'Error during user\'s name update!'
 const updateCryptoRegistryMsg = 'CryptoRegistry\'s update successfully!';
-//const updateCryptoRegistryErroMsg = 'Error during CryptoRegistry\'s update!';
+const unauthorizedLoginMsg = 'User not autenticated!'
 
 const app = express();
 app.use(cors());
 
 app.use(bodyparser.urlencoded({extended: true}));
 app.use(bodyparser.json());
+
+const tokenGen = (userId) => {
+    const privateKey = fs.readFileSync('keys/private-key.key', 'utf-8');
+    const token = jwt.sign({userId: userId}, privateKey, {
+        algorithm: "RS256",
+        expiresIn: tokenExpiresTime
+    })
+}
+
+const checkToken = (req, res, next) => {
+    const token = req.headers["x-access-token"];
+    if(token) {
+        try {
+            const publicKey = fs.readFileSync('keys/public-key.key', 'utf-8');
+            jwt.verify(token, publicKey, {algorithm: ["RS256"]}, async (err, decoded) => {
+                if(err) {
+                    console.log(err);
+                    res.status(401).json({msg: unauthorizedLoginMsg});
+                }
+                const check = await dao.authenticate.isInactiveToken(token, decoded.userId);
+                if(!check) res.status(401).json({msg: unauthorizedLoginMsg});
+                next();
+            });
+        } catch (error) {
+            res.status(500);
+            console.error(error.message);
+            console.error(error.stack);
+            res.json(error);
+            
+        }
+    }
+}
 
 app.post('/user/create', async (req, res) => {
     try {
@@ -35,7 +68,7 @@ app.post('/user/create', async (req, res) => {
     
 });
 
-app.post('/user/update-name', async (req, res) => {
+app.post('/user/update-name', checkToken, async (req, res) => {
     try {
         const newName =  req.body.name;
         const email =  req.body.email;
@@ -49,7 +82,7 @@ app.post('/user/update-name', async (req, res) => {
     } 
 });
 
-app.post('/user/update-passwd', async (req, res) => {
+app.post('/user/update-passwd', checkToken, async (req, res) => {
     try {
         const newPasswd =  req.body.passwd;
         const email =  req.body.email;
@@ -63,12 +96,16 @@ app.post('/user/update-passwd', async (req, res) => {
     } 
 });
 
-app.post('/user/login', async (req, res) => {
+app.post('/user/login', checkToken, async (req, res) => {
     try {
         const email =  req.body.email;
         const passwd =  req.body.passwd;
-        const check = await dao.user.checkUserCredentials(email, passwd);
-        res.json({login: check});
+        const result = await dao.user.checkUserCredentials(email, passwd);
+        if(result.check) {
+            const token = tokenGen(result.userId)
+            res.json({login: check, token: token});
+        }
+        res.status(401).json({login: check, msg: unauthorizedLoginMsg});
     } catch (error) {
         res.status(500);
         console.error(error.message);
@@ -77,7 +114,7 @@ app.post('/user/login', async (req, res) => {
     }
 });
 
-app.get('/user/:id', async (req, res) => {
+app.get('/user/:id', checkToken, async (req, res) => {
     try {
         const userInfo = await dao.user.getUser(req.params.id);
         res.json(userInfo);
@@ -103,7 +140,7 @@ app.get('/crypto/search/:ticker', async (req, res) => {
     }
 });
 
-app.post('/crypto/create', async (req, res) => {
+app.post('/crypto/create', checkToken, async (req, res) => {
     try {
         const ticker = req.body.ticker;
         const quantity = req.body.quantity;
@@ -118,7 +155,7 @@ app.post('/crypto/create', async (req, res) => {
     }
 })
 
-app.post('/crypto/update', async (req, res) => {
+app.post('/crypto/update', checkToken, async (req, res) => {
     try {
         const id = req.body.id;
         const userId = req.body.userId;
@@ -133,7 +170,7 @@ app.post('/crypto/update', async (req, res) => {
 })
 
 
-app.get('/crypto/delete/:userId/:id', async (req, res) => {
+app.get('/crypto/delete/:userId/:id', checkToken, async (req, res) => {
     try {
         const id = req.params.id;
         const userId = req.params.userId;
@@ -147,9 +184,12 @@ app.get('/crypto/delete/:userId/:id', async (req, res) => {
     }
 })
 
-app.get('/crypto/get/:userId/:id', async (req, res) => {
+app.get('/crypto/get/:userId/:id', checkToken, async (req, res) => {
     try {
-        
+        const id = req.params.id;
+        const userId = req.params.userId;
+        const cryptoRegistry = await dao.cryptoRegistry.getCryptoRegistry(id, userId);
+        res.json(cryptoRegistry);
     } catch (error) {
         res.status(500);
         console.error(error.message);
@@ -158,9 +198,11 @@ app.get('/crypto/get/:userId/:id', async (req, res) => {
     }
 })
 
-app.get('/crypto/getAll/:userId', async (req, res) => {
+app.get('/crypto/getAll/:userId', checkToken, async (req, res) => {
     try {
-        
+        const userId = req.params.userId;
+        const cryptoRegisters = await dao.cryptoRegistry.getCryptoRegisters(userId);
+        res.json(cryptoRegisters);
     } catch (error) {
         res.status(500);
         console.error(error.message);
@@ -170,5 +212,6 @@ app.get('/crypto/getAll/:userId', async (req, res) => {
 })
 
 
-console.log(`Server running on port ${port}`);
-app.listen(port);
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+});

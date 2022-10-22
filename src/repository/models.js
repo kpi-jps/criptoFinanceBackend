@@ -21,7 +21,7 @@ const User = sequelize.define('User', {
         type: DataTypes.STRING,
         allownull: false,
     }
-})
+});
 
 const CryptoRegistry = sequelize.define('CryptoRegistry', {
     id: {
@@ -38,7 +38,25 @@ const CryptoRegistry = sequelize.define('CryptoRegistry', {
         type: DataTypes.NUMBER,
         allowNull: false
     },
-})
+});
+
+const InactiveToken = sequelize.define('InactiveToken', {
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        allowNull: false,
+        primaryKey: true
+    },
+    token: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    time: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    }
+});
+
 
 //Relationships
 User.hasMany(CryptoRegistry, {
@@ -49,4 +67,15 @@ CryptoRegistry.belongsTo(User, {
     foreignKey: 'userId'
 });
 
-module.exports = {User, CryptoRegistry};
+User.hasMany(InactiveToken, {
+    foreignKey: 'userId',
+    onDelete: 'CASCADE'
+});
+
+InactiveToken.belongsTo(User, {
+    foreignKey: 'userId'
+});
+
+
+
+module.exports = {User, CryptoRegistry, InactiveToken};

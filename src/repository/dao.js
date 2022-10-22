@@ -39,7 +39,17 @@ const checkUserCredentials = async (email, passwd) => {
     try {
         await db.sync();
         const user = await findUser(email);
-        return bcrypt.compareSync(passwd, user.hash)
+        const check = bcrypt.compareSync(passwd, user.hash);
+        if(check) {
+            return {
+                check: check,
+                userId: user.id
+            }
+        }
+        return {
+            check: check,
+            userId: null
+        }
     } catch (error) {
         throw error;
     }
@@ -89,7 +99,7 @@ const createCryptoRegistry = async (ticker, quantity, userId) => {
     }
 }
 
-const findCryptoRegistry = async (id, userId) => {
+const getCryptoRegistry = async (id, userId) => {
     try {
         await db.sync();
         const cryptoRegistry = await models.User.findOne({
@@ -105,7 +115,7 @@ const findCryptoRegistry = async (id, userId) => {
     
 }
 
-const findCryptoRegisters = async (userId) => {
+const getCryptoRegisters = async (userId) => {
     try {
         await db.sync();
         const cryptoRegisters = await models.User.findAll({
@@ -147,13 +157,46 @@ const deleteCryptoRegistry = async (id, userId) => {
     }  
 }
 
+const saveToken = async (token, userId) => {
+    try {
+        await db.sync();
+        await models.InactiveToken.create({
+            token: token, 
+            time: new Date().getTime(),
+            userId: userId
+        });       
+    } catch (error) {
+        throw error;
+    }
+}
+
+const isInactiveToken = async (token, userId) => {
+    try {
+        await db.sync();
+        const result = await models.User.findOne({
+            where: {
+                token:token,
+                userId: userId
+            }
+        });
+        if (result == null) return true
+        return false
+    } catch (error) {
+        throw error;
+    }
+}
+
 module.exports = {
     user: {
         createUser, getUser, checkUserCredentials, updateUserName, updateUserPasswd
     },
     cryptoRegistry: {
-        createCryptoRegistry, findCryptoRegistry, findCryptoRegisters, 
+        createCryptoRegistry, getCryptoRegistry, getCryptoRegisters, 
         updateCryptoRegistry, deleteCryptoRegistry
+    },
+
+    authenticate: {
+        isInactiveToken, saveToken
     }
      
 }
