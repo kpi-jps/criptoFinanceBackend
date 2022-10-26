@@ -83,6 +83,8 @@ const checkToken = async (req, res, next) => {
         const token = req.cookies.token;
         console.log(token);
         const decoded = jwt.verify(token, publicKey, {algorithm: ["RS256"]});
+        //console.log(decoded);
+        req.userId = decoded.userId;
         next();
     } catch (error) {
         res.status(401).json({msg: res.__("unauthorizedLoginMsg")});
@@ -114,7 +116,7 @@ app.post('/user/create', async (req, res) => {
     
 });
 
-app.post('/user/update-name', checkToken, async (req, res) => {
+app.put('/user/update-name', checkToken, async (req, res) => {
     try {
         const newName =  req.body.newName;
         const email =  req.body.email;
@@ -137,7 +139,7 @@ app.post('/user/update-name', checkToken, async (req, res) => {
     } 
 });
 
-app.post('/user/update-passwd', checkToken, async (req, res) => {
+app.put('/user/update-passwd', checkToken, async (req, res) => {
     try {
         const newPasswd =  req.body.newPasswd;
         const email =  req.body.email;
@@ -215,9 +217,9 @@ app.get('/user/logout', (req, res) => {
     }
 })
 
-app.get('/user/:id', checkToken, async (req, res) => {
+app.post('/user', checkToken, async (req, res) => {
     try {
-        const userInfo = await dao.user.getUser(req.params.id);
+        const userInfo = await dao.user.getUser(req.userId);
         res.json(userInfo);
     } catch (error) {
         res.status(500);
@@ -256,7 +258,7 @@ app.post('/crypto/create', checkToken, async (req, res) => {
     }
 })
 
-app.post('/crypto/update', checkToken, async (req, res) => {
+app.put('/crypto/update', checkToken, async (req, res) => {
     try {
         const id = req.body.id;
         const userId = req.body.userId;
@@ -272,10 +274,10 @@ app.post('/crypto/update', checkToken, async (req, res) => {
 })
 
 
-app.get('/crypto/delete/:userId/:id', checkToken, async (req, res) => {
+app.delete('/crypto/delete/:id', checkToken, async (req, res) => {
     try {
         const id = req.params.id;
-        const userId = req.params.userId;
+        const userId = req.userId;
         await dao.cryptoRegistry.deleteCryptoRegistry(id, userId);
         res.json({msg: res.__("deleteCryptoRegistryMsg")});
     } catch (error) {
