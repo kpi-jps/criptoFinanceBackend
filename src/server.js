@@ -1,7 +1,7 @@
+require('dotenv').config();
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const i18n = require('i18n');
-const fs = require('fs');
 const bodyparser = require('body-parser');
 const cookieParser = require('cookie-parser')
 const cors = require("cors");
@@ -9,11 +9,12 @@ const dao = require('./repository/dao.js');
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 
+
 //Constants
-const port = 5555;
-const tokenExpiresTime = 120; //seconds
-const publicKey = fs.readFileSync('keys/public-key.key', 'utf-8');
-const privateKey = fs.readFileSync('keys/private-key.key', 'utf-8');
+const port = process.env.PORT;
+const tokenExpiresTime = parseInt(process.env.TOKEN_EXPERIS_TIME);
+const publicKey = process.env.PUBLIC_KEY;
+const privateKey = process.env.PRIVATE_KEY
 const validator = require('./utils/validator');
 
 
@@ -50,40 +51,12 @@ const tokenGen = (userId) => {
     })
     return token;
 }
-/*
-const checkToken = async (req, res, next) => {
-    try {
-        const token = req.cookies.token;
-        console.log(token);
-        if(token == undefined || token == null) {
-            res.status(401).json({msg: '1: '+unauthorizedLoginMsg});
-            return;
-        }
-        const decoded = jwt.verify(token, publicKey, {algorithm: ["RS256"]});
-        const check = await dao.authenticate.isInactiveToken(token, decoded.userId);
-        if(check) {
-            res.status(401).json({msg: '1: '+unauthorizedLoginMsg});
-            return;
-        }
-        next();
-    } catch (error) {
-       
-        res.status(500);
-        console.error(error.message);
-        console.error(error.stack);
-        res.json(error);
-        
-        
-    }
-}
-*/
 
 const checkToken = async (req, res, next) => {
     try {
         const token = req.cookies.token;
-        console.log(token);
+        //console.log(token);
         const decoded = jwt.verify(token, publicKey, {algorithm: ["RS256"]});
-        //console.log(decoded);
         req.userId = decoded.userId;
         next();
     } catch (error) {
@@ -183,26 +156,8 @@ app.post('/user/login', async (req, res) => {
     }
 });
 
-/*
-app.get('/user/logout', async (req, res) => {
-    try {
-        const token = req.cookies.token;
-        const decoded = jwt.verify(token, publicKey, {algorithm: ["RS256"]});
-        await dao.authenticate.saveToken(token, decoded.userId);
-        res.json({msg: logoutMsg});
-    } catch (error) {
-        res.status(500);
-        console.error(error.message);
-        console.error(error.stack);
-        res.json(error);
-    }
-})
-*/
-
 app.get('/user/logout', (req, res) => {
     try {
-        //const token = req.cookies.token;
-        //const decoded = jwt.verify(token, publicKey, {algorithm: ["RS256"]});
         const newToken = jwt.sign({}, privateKey, {
             algorithm: "RS256",
             expiresIn: 1
