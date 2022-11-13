@@ -47,12 +47,14 @@ const checkUserCredentials = async (email, passwd) => {
         if(check) {
             return {
                 check: check,
-                userId: user.id
+                userId: user.id,
+                userName: user.name
             }
         }
         return {
             check: check,
-            userId: null
+            userId: null,
+            userName: null
         }
     } catch (error) {
         throw error;

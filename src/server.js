@@ -28,8 +28,15 @@ i18n.configure({
   
   });
 
+//Cors configurations for local tests
+const corsOptions = {
+  origin: 'http://localhost:3000',
+  credentials: true,
+  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
+
 const app = express();
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(i18n.init)
 app.use(bodyparser.urlencoded({extended: true}));
@@ -43,6 +50,7 @@ app.use((req, res, next) => {
     req.setLocale(lang);
     next();
   });
+
 
 const tokenGen = (userId) => {
     const token = jwt.sign({userId: userId}, privateKey, {
@@ -134,8 +142,9 @@ app.post('/user/login', async (req, res) => {
         const result = await dao.user.checkUserCredentials(email, passwd);
         if(result.check) {
             const token = tokenGen(result.userId)
-            res.cookie("token", token)
-            res.json({login: result.check, msg: res.__("loginMsg"), userId: result.userId});
+            //setting cookie to store token only for local tests (not secure)!!!
+            res.cookie("token", token, {sameSite: 'None', secure: true});  
+            res.json({login: result.check, msg: res.__("loginMsg"), userId: result.userId, userName: result.userName});
         } else {
             res.status(401).json({login: result.check, msg: res.__("unauthorizedLoginMsg")});
         }
@@ -161,8 +170,9 @@ app.get('/user/logout', (req, res) => {
         const newToken = jwt.sign({}, privateKey, {
             algorithm: "RS256",
             expiresIn: 1
-        })
-        res.cookie("token", newToken);
+        });
+        //setting cookie to store token only for local tests (not secure)!!!
+        res.cookie("token", newToken, {sameSite: 'None', secure: true});
         res.json({msg: res.__("logoutMsg")});
     } catch (error) {
         res.status(500);
