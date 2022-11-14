@@ -8,6 +8,8 @@
     "loginMsg" : "Usuário logado!",
     "logoutMsg" : "Usuário deslogado!",
     "invalidEmailMsg" : "Email inválido!",
-    "invalidPasswdMsg" : "Senha inválida"
+    "invalidPasswdMsg" : "Senha inválida",
+    "userAlreadExistMsg" : "Email já cadastrado!",
+	"userNotExistMsg" : "Usuário não existe!"
 
 }

@@ -2,6 +2,7 @@ const db = require('./db.js');
 const models = require('./models');
 const bcrypt = require('bcrypt');
 
+
 const saltRounds = 10; //used by bcrypt
 
 const createUser = async (name, email, passwd) => {
@@ -15,6 +16,21 @@ const createUser = async (name, email, passwd) => {
         });
        return {userId: user.id, userName: user.name};
         
+    } catch (error) {
+        throw error;
+    }
+    
+}
+
+const findUser = async (email) => {
+    try {
+        await db.sync();
+        const user = await models.User.findOne({
+            where: {
+                email: email
+            }
+        });
+        return user;
     } catch (error) {
         throw error;
     }
@@ -195,7 +211,7 @@ const isInactiveToken = async (token, userId) => {
 */
 module.exports = {
     user: {
-        createUser, getUser, checkUserCredentials, updateUserName, updateUserPasswd
+        createUser, getUser, findUser, checkUserCredentials, updateUserName, updateUserPasswd
     },
     cryptoRegistry: {
         createCryptoRegistry, getCryptoRegistry, getCryptoRegisters, 

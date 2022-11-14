@@ -78,6 +78,8 @@ app.post('/user/create', async (req, res) => {
         const email =  req.body.email;
         const passwd =  req.body.passwd;
         validator.emailValidator(email, res.__("invalidEmailMsg"));
+        const user = await dao.user.findUser(email);
+        if(user != null) validator.userValidator(true, res.__("userAlreadExistMsg"))
         const userInfo =  await dao.user.createUser(name, email, passwd);
         res.json(userInfo);
     } catch (error) {
@@ -86,6 +88,10 @@ app.post('/user/create', async (req, res) => {
             return;
         }
         if(error instanceof validator.InvalidPasswdError) {
+            res.status(500).json({msg: error.message});
+            return;
+        }
+        if(error instanceof validator.UserAlreadyExistError) {
             res.status(500).json({msg: error.message});
             return;
         }
@@ -139,6 +145,8 @@ app.post('/user/login', async (req, res) => {
         const email =  req.body.email;
         const passwd =  req.body.passwd;
         validator.emailValidator(email, res.__("invalidEmailMsg"));
+        const user = await dao.user.findUser(email);
+        if(user == null) validator.userValidator(false, res.__("userNotExistMsg"))
         const result = await dao.user.checkUserCredentials(email, passwd);
         if(result.check) {
             const token = tokenGen(result.userId)
@@ -155,6 +163,10 @@ app.post('/user/login', async (req, res) => {
             return;
         }
         if(error instanceof validator.InvalidPasswdError) {
+            res.status(500).json({msg: error.message});
+            return;
+        }
+        if(error instanceof validator.UserNotExistError) {
             res.status(500).json({msg: error.message});
             return;
         }

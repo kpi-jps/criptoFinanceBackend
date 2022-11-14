@@ -10,6 +10,18 @@ class InvalidPasswdError extends Error {
     }
 }
 
+class UserNotExistError extends Error {
+    constructor(errorMsg) {
+        super(errorMsg);
+    }
+}
+
+class UserAlreadyExistError extends Error {
+    constructor(errorMsg) {
+        super(errorMsg);
+    }
+}
+
 
 const emailValidator = (input, msg) => {
     const regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -21,4 +33,9 @@ const passwdValidator = (input, msg) => {
     if(!regex.test(input)) throw new InvalidPasswdError(msg);
 }
 
-module.exports = {emailValidator, passwdValidator, InvalidEmailError, InvalidPasswdError}
+const userValidator = (check, msg) => {
+    if(check) throw new UserAlreadyExistError(msg);
+    throw new UserNotExistError(msg);
+} 
+
+module.exports = {emailValidator, passwdValidator, userValidator, UserAlreadyExistError, UserNotExistError, InvalidEmailError, InvalidPasswdError}

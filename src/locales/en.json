@@ -7,5 +7,7 @@
 	"logoutMsg": "User logout successfully!",
 	"invalidEmailMsg": "Invalid email!",
 	"invalidPasswdMsg": "Invalid password!",
-	"loginMsg": "User logged!"
+	"loginMsg": "User logged!",
+	"userAlreadExistMsg" : "Email already registered!",
+	"userNotExistMsg" : "User not exist!"
 }
