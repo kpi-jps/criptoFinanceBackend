@@ -152,7 +152,7 @@ app.post('/user/login', async (req, res) => {
             const token = tokenGen(result.userId)
             //setting cookie to store token only for local tests (not secure)!!!
             res.cookie("token", token, {sameSite: 'None', secure: true});  
-            res.json({login: result.check, msg: res.__("loginMsg"), userId: result.userId, userName: result.userName});
+            res.json({login: result.check, msg: res.__("loginMsg"), userEmail: result.userEmail, userId: result.userId, userName: result.userName});
         } else {
             res.status(401).json({login: result.check, msg: res.__("unauthorizedLoginMsg")});
         }

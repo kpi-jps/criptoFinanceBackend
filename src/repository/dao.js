@@ -65,7 +65,8 @@ const checkUserCredentials = async (email, passwd) => {
             return {
                 check: check,
                 userId: user.id,
-                userName: user.name
+                userName: user.name,
+                userEmail: user.email
             }
         }
         return {
