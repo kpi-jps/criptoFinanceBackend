@@ -27,7 +27,8 @@ const getUser = async (id) => {
         const user = await models.User.findByPk(id);
         return {
             userId: user.id,
-            userName: user.name
+            userName: user.name,
+            userEmail: user.email
         };
     } catch (error) {
         throw error;
