@@ -251,10 +251,10 @@ app.put('/crypto/update', checkToken, async (req, res) => {
 })
 
 
-app.delete('/crypto/delete/:id', checkToken, async (req, res) => {
+app.delete('/crypto/delete', checkToken, async (req, res) => {
     try {
-        const id = req.params.id;
-        const userId = req.userId;
+        const id = req.body.id;
+        const userId = req.body.userId;
         await dao.cryptoRegistry.deleteCryptoRegistry(id, userId);
         res.json({msg: res.__("deleteCryptoRegistryMsg")});
     } catch (error) {
