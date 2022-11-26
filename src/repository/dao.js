@@ -226,6 +226,6 @@ module.exports = {
     */
      
 }
-//createUser('João Pedro', 'jps.spj@gmail.com', '1234');
+//createUser('João Pedro', 'jps@gmail.com', '1234');
 //deleteCryptoRegistry(1,1);
 //console.log(checkUserCredentials('jps.spj@gmail.com', '1234'));
